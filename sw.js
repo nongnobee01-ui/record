@@ -1,4 +1,4 @@
-const CACHE_NAME = "site-report-cache-v1";
+const CACHE_NAME = "site-report-cache-v2";
 const CORE_ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -17,15 +17,22 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Network-first for navigation/API calls, cache-first for static core assets.
+// Network-first for core assets (so updates show up immediately), falling back
+// to cache only when offline. Everything else (Supabase API, fonts, CDN
+// scripts) goes straight to network untouched.
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   const isCoreAsset = CORE_ASSETS.some((a) => url.pathname.endsWith(a.replace("./", "")));
 
   if (isCoreAsset) {
     event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request))
+      fetch(event.request)
+        .then((res) => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+          return res;
+        })
+        .catch(() => caches.match(event.request))
     );
   }
-  // All other requests (Supabase API, fonts, CDN scripts) go straight to network.
 });
