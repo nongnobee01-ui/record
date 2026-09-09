@@ -177,50 +177,7 @@ async function uploadPhoto(blob) {
   return `${STORAGE_PUBLIC_URL}/${path}`;
 }
 
-// ---- Daily summary popup ----
-function SummaryModal({ data, onClose }) {
-  if (!data) return null;
-  return (
-    <div className="srp-modal-overlay" onClick={onClose}>
-      <div className="srp-modal-card" onClick={(e) => e.stopPropagation()}>
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 12, color: "#5C6672" }}>
-          สรุปวันนี้
-        </div>
-        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22, marginBottom: 14 }}>
-          {data.day} {THAI_MONTHS[data.month]} {data.year}
-        </div>
-
-        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-          <div style={styles.statBox}>
-            <div style={styles.statNumber}>{data.totalReports}</div>
-            <div style={styles.statLabel}>รายงานวันนี้</div>
-          </div>
-          <div style={styles.statBox}>
-            <div style={styles.statNumber}>{data.unitCounts.length}</div>
-            <div style={styles.statLabel}>หน่วยที่ส่งมา</div>
-          </div>
-          <div style={styles.statBox}>
-            <div style={styles.statNumber}>{data.totalPhotos}</div>
-            <div style={styles.statLabel}>รูปทั้งหมด</div>
-          </div>
-        </div>
-
-        <div style={{ fontSize: 13, color: "#5C6672", marginBottom: 8, fontWeight: 500 }}>รายชื่อผู้ส่งรายงานวันนี้</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 200, overflowY: "auto" }}>
-          {data.entries.map((e, idx) => (
-            <div key={idx} style={styles.summaryRow}>
-              <span style={{ fontWeight: 500 }}>{e.rank_name}</span>
-              <span style={{ color: "#5C6672" }}>{e.unit}</span>
-            </div>
-          ))}
-        </div>
-
-        <button className="srp-modal-close" onClick={onClose}>ปิด</button>
-      </div>
-    </div>
-  );
-}
-
+// ---- Report detail page (opened in a new tab) ----
 function ReportDetailPage({ id }) {
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -283,24 +240,6 @@ function ReportDetailPage({ id }) {
       )}
     </div>
   );
-}
-
-async function fetchDailySummary(day, month, year) {
-  const res = await fetch(
-    `${REST_URL}?select=rank_name,unit,photo_urls&report_day=eq.${day}&report_month=eq.${month}&report_year=eq.${year}`,
-    { headers: SUPABASE_HEADERS }
-  );
-  if (!res.ok) throw new Error("summary failed");
-  const rows = await res.json();
-  const unitSet = new Set(rows.map((r) => r.unit));
-  const totalPhotos = rows.reduce((sum, r) => sum + ((r.photo_urls && r.photo_urls.length) || 0), 0);
-  return {
-    day, month, year,
-    totalReports: rows.length,
-    unitCounts: Array.from(unitSet),
-    totalPhotos,
-    entries: rows.map((r) => ({ rank_name: r.rank_name, unit: r.unit })),
-  };
 }
 
 // ---- Monthly dashboard ----
@@ -417,7 +356,7 @@ function Dashboard() {
 }
 
 // ---- Report form ----
-function ReportForm({ onSubmitted }) {
+function ReportForm() {
   const initDate = todayParts();
   const [rankName, setRankName] = useState("");
   const [unit, setUnit] = useState("");
@@ -427,27 +366,31 @@ function ReportForm({ onSubmitted }) {
   const [month, setMonth] = useState(initDate.month);
   const [year, setYear] = useState(initDate.year);
   const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingReports, setLoadingReports] = useState(false);
+  const [showRecentModal, setShowRecentModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const fileInputRef = useRef(null);
 
   const loadReports = useCallback(async () => {
-    setLoading(true);
+    setLoadingReports(true);
     try {
       const res = await fetch(`${REST_URL}?select=*&order=created_at.desc&limit=50`, { headers: SUPABASE_HEADERS });
       if (!res.ok) throw new Error("load failed");
       const data = await res.json();
       setReports(data);
     } catch (e) {
-      setError("โหลดรายงานไม่สำเร็จ ลองรีเฟรชอีกครั้ง");
+      setError("โหลดรายงานไม่สำเร็จ ลองอีกครั้ง");
     } finally {
-      setLoading(false);
+      setLoadingReports(false);
     }
   }, []);
 
-  useEffect(() => { loadReports(); }, [loadReports]);
+  function openRecentModal() {
+    setShowRecentModal(true);
+    loadReports();
+  }
 
   useEffect(() => {
     if (!toast) return;
@@ -510,9 +453,6 @@ function ReportForm({ onSubmitted }) {
       setNotes("");
       setPhotoFiles([]);
       setToast("บันทึกรายงานแล้ว");
-
-      const summary = await fetchDailySummary(day, month, year);
-      onSubmitted(summary);
     } catch (e) {
       console.error(e);
       setError("บันทึกไม่สำเร็จ ลองอีกครั้ง");
@@ -590,44 +530,68 @@ function ReportForm({ onSubmitted }) {
         </button>
       </div>
 
-      <div style={{ marginTop: 24 }}>
-        <div style={styles.sectionTitle}>รายงานล่าสุด</div>
-        {loading ? (
-          <div style={styles.emptyText}>กำลังโหลด...</div>
-        ) : reports.length === 0 ? (
-          <div style={styles.emptyText}>ยังไม่มีรายงาน แตะปุ่มด้านบนเพื่อเริ่มบันทึก</div>
-        ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {reports.map((r) => (
-              <div key={r.id} style={{ ...styles.reportCard, cursor: "pointer" }} onClick={() => window.open(`?report=${r.id}`, "_blank")}>
-                <div style={{ display: "flex", gap: 10 }}>
-                  {r.photo_urls && r.photo_urls[0] && (
-                    <img src={r.photo_urls[0]} alt={r.rank_name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
-                  )}
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={styles.reportProject}>{r.rank_name}</div>
-                    <div style={styles.reportMeta}>{r.unit}</div>
-                    <div style={styles.reportMeta}>
-                      {r.report_day} {THAI_MONTHS[r.report_month]} {r.report_year}
-                      {r.photo_urls && r.photo_urls.length > 1 ? ` · ${r.photo_urls.length} รูป` : ""}
-                    </div>
-                    {r.notes && <div style={styles.reportNotes}>{r.notes}</div>}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <button
+        type="button"
+        onClick={openRecentModal}
+        style={{
+          width: "100%",
+          marginTop: 14,
+          padding: "12px",
+          borderRadius: 8,
+          border: "1px solid #C9C2B4",
+          background: "#FFFFFF",
+          color: "#17203A",
+          fontFamily: "'Space Grotesk', sans-serif",
+          fontWeight: 600,
+          fontSize: 14,
+          cursor: "pointer",
+        }}
+      >
+        ดูรายงานล่าสุด
+      </button>
 
       {toast && <div style={styles.toast}>{toast}</div>}
+
+      {showRecentModal && (
+        <div className="srp-modal-overlay" onClick={() => setShowRecentModal(false)}>
+          <div className="srp-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div style={styles.sectionTitle}>รายงานล่าสุด</div>
+            {loadingReports ? (
+              <div style={styles.emptyText}>กำลังโหลด...</div>
+            ) : reports.length === 0 ? (
+              <div style={styles.emptyText}>ยังไม่มีรายงาน</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {reports.map((r) => (
+                  <div key={r.id} style={{ ...styles.reportCard, cursor: "pointer" }} onClick={() => window.open(`?report=${r.id}`, "_blank")}>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {r.photo_urls && r.photo_urls[0] && (
+                        <img src={r.photo_urls[0]} alt={r.rank_name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+                      )}
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={styles.reportProject}>{r.rank_name}</div>
+                        <div style={styles.reportMeta}>{r.unit}</div>
+                        <div style={styles.reportMeta}>
+                          {r.report_day} {THAI_MONTHS[r.report_month]} {r.report_year}
+                          {r.photo_urls && r.photo_urls.length > 1 ? ` · ${r.photo_urls.length} รูป` : ""}
+                        </div>
+                        {r.notes && <div style={styles.reportNotes}>{r.notes}</div>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button className="srp-modal-close" onClick={() => setShowRecentModal(false)}>ปิด</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 function App() {
   const [view, setView] = useState("form");
-  const [summary, setSummary] = useState(null);
 
   return (
     <div style={styles.page}>
@@ -641,9 +605,7 @@ function App() {
         <button className={`srp-nav-btn${view === "dashboard" ? " active" : ""}`} onClick={() => setView("dashboard")}>แดชบอร์ด</button>
       </div>
 
-      {view === "form" ? <ReportForm onSubmitted={setSummary} /> : <Dashboard />}
-
-      <SummaryModal data={summary} onClose={() => setSummary(null)} />
+      {view === "form" ? <ReportForm /> : <Dashboard />}
     </div>
   );
 }
