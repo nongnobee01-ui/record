@@ -669,14 +669,79 @@ function ReportForm() {
   );
 }
 
+// ---- Install guide popup ----
+function GuideModal({ onClose }) {
+  return (
+    <div className="srp-modal-overlay" onClick={onClose}>
+      <div className="srp-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div style={styles.sectionTitle}>คู่มือการใช้งาน</div>
+
+        <div style={{ fontSize: 13, color: "#5C6672", marginBottom: 6, fontWeight: 500 }}>
+          วิธีเพิ่มไอคอนแอปไว้ที่หน้าจอโฮม
+        </div>
+        <div style={{ fontSize: 13, color: "#3A4356", marginBottom: 16, lineHeight: 1.6 }}>
+          ทำครั้งเดียว หลังจากนั้นเปิดแอปได้จากหน้าจอโฮมเหมือนแอปทั่วไป ไม่ต้องเปิดผ่านเบราว์เซอร์อีก
+        </div>
+
+        <div style={{ ...styles.card, marginBottom: 14 }}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
+            📱 iPhone (Safari)
+          </div>
+          <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.9, color: "#3A4356" }}>
+            <li>กดปุ่ม <strong>แชร์</strong> (ไอคอนสี่เหลี่ยมมีลูกศรชี้ขึ้น) แถบด้านล่างจอ</li>
+            <li>เลื่อนหาเมนู แล้วกด <strong>"เพิ่มไปยังหน้าจอโฮม"</strong></li>
+            <li>กด <strong>"เพิ่ม"</strong> มุมขวาบน</li>
+          </ol>
+        </div>
+
+        <div style={styles.card}>
+          <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 14, marginBottom: 8 }}>
+            🤖 Android (Chrome)
+          </div>
+          <ol style={{ margin: 0, paddingLeft: 18, fontSize: 13, lineHeight: 1.9, color: "#3A4356" }}>
+            <li>กดปุ่ม <strong>จุดสามจุด ⋮</strong> มุมขวาบน</li>
+            <li>เลือก <strong>"ติดตั้งแอป"</strong> หรือ <strong>"เพิ่มไปยังหน้าจอหลัก"</strong></li>
+            <li>กดยืนยัน <strong>"ติดตั้ง" / "เพิ่ม"</strong></li>
+          </ol>
+        </div>
+
+        <button className="srp-modal-close" onClick={onClose}>ปิด</button>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   const [view, setView] = useState("form");
+  const [showGuide, setShowGuide] = useState(false);
 
   return (
     <div style={styles.page}>
-      <div style={styles.header}>
-        <div style={styles.headerEyebrow}>รายงานหน้างาน</div>
-        <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : "แดชบอร์ดรายเดือน"}</div>
+      <div style={{ ...styles.header, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+        <div>
+          <div style={styles.headerEyebrow}>รายงานหน้างาน</div>
+          <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : "แดชบอร์ดรายเดือน"}</div>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowGuide(true)}
+          style={{
+            border: "1px solid #C9C2B4",
+            background: "#FFFFFF",
+            color: "#17203A",
+            borderRadius: 8,
+            padding: "8px 12px",
+            fontSize: 12,
+            fontFamily: "'IBM Plex Sans Thai', sans-serif",
+            fontWeight: 500,
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            marginLeft: 10,
+          }}
+        >
+          คู่มือการใช้งาน
+        </button>
       </div>
 
       <div className="srp-nav">
@@ -685,6 +750,8 @@ function App() {
       </div>
 
       {view === "form" ? <ReportForm /> : <Dashboard />}
+
+      {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
     </div>
   );
 }
