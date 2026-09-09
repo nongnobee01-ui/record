@@ -245,8 +245,35 @@ function ReportDetailPage({ id }) {
     return () => { cancelled = true; };
   }, [id]);
 
+  function handleClose() {
+    if (window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    // Opened via window.open with no history (e.g. from the home-screen app) — close the tab directly.
+    window.close();
+  }
+
   return (
     <div style={styles.page}>
+      <button
+        type="button"
+        onClick={handleClose}
+        style={{
+          border: "1px solid #C9C2B4",
+          background: "#FFFFFF",
+          color: "#17203A",
+          borderRadius: 8,
+          padding: "10px 14px",
+          fontSize: 13,
+          fontFamily: "'IBM Plex Sans Thai', sans-serif",
+          fontWeight: 500,
+          cursor: "pointer",
+          marginBottom: 14,
+        }}
+      >
+        ← ปิดหน้านี้
+      </button>
       <div style={styles.header}>
         <div style={styles.headerEyebrow}>รายงานหน้างาน</div>
         <div style={styles.headerTitle}>รายละเอียดรายงาน</div>
