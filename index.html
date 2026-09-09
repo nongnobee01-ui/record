@@ -108,6 +108,32 @@
     font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 16px;
   }
   .srp-dash-select { flex: 1; }
+  .srp-cal-weekdays {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    text-align: center; font-size: 11px; color: #5C6672; margin-bottom: 6px;
+  }
+  .srp-cal-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+  }
+  .srp-cal-cell {
+    aspect-ratio: 1; border-radius: 8px; border: 1px solid #E4DFD2;
+    background: #FFFFFF; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; cursor: pointer;
+    font-size: 13px; position: relative;
+  }
+  .srp-cal-cell.empty { border: none; background: transparent; cursor: default; }
+  .srp-cal-cell.has-reports { border-color: #E8622C; background: #FDECE4; }
+  .srp-cal-badge {
+    position: absolute; top: 2px; right: 2px;
+    background: #E8622C; color: #fff; border-radius: 50%;
+    min-width: 16px; height: 16px; font-size: 10px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 3px;
+  }
+  .srp-cal-back {
+    background: none; border: none; color: #E8622C; font-size: 13px;
+    font-weight: 600; cursor: pointer; padding: 0; margin-bottom: 10px;
+  }
 </style>
 </head>
 <body>
@@ -355,6 +381,115 @@ function Dashboard() {
   );
 }
 
+// ---- Recent reports calendar popup ----
+function RecentReportsModal({ onClose }) {
+  const initDate = todayParts();
+  const [mMonth, setMMonth] = useState(initDate.month);
+  const [mYear, setMYear] = useState(initDate.year);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(null);
+
+  const yearOptions = Array.from({ length: 6 }, (_, i) => initDate.year - 2 + i);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setSelectedDay(null);
+    fetch(`${REST_URL}?select=*&report_month=eq.${mMonth}&report_year=eq.${mYear}`, { headers: SUPABASE_HEADERS })
+      .then((res) => res.json())
+      .then((data) => { if (!cancelled) setRows(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!cancelled) setRows([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [mMonth, mYear]);
+
+  const totalDays = daysInMonth(mMonth, mYear);
+  const yearAD = mYear - 543;
+  const firstWeekday = new Date(yearAD, mMonth, 1).getDay();
+
+  const dayCounts = {};
+  rows.forEach((r) => { dayCounts[r.report_day] = (dayCounts[r.report_day] || 0) + 1; });
+
+  const cells = [];
+  for (let i = 0; i < firstWeekday; i++) cells.push(null);
+  for (let d = 1; d <= totalDays; d++) cells.push(d);
+
+  const dayReports = selectedDay ? rows.filter((r) => r.report_day === selectedDay) : [];
+
+  return (
+    <div className="srp-modal-overlay" onClick={onClose}>
+      <div className="srp-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div style={styles.sectionTitle}>รายงานประจำวัน</div>
+
+        <div className="srp-date-row" style={{ marginBottom: 12 }}>
+          <select className="srp-select srp-dash-select" value={mMonth} onChange={(e) => setMMonth(Number(e.target.value))}>
+            {THAI_MONTHS.map((m, idx) => <option key={m} value={idx}>{m}</option>)}
+          </select>
+          <select className="srp-select" style={{ flex: "0 0 90px" }} value={mYear} onChange={(e) => setMYear(Number(e.target.value))}>
+            {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
+
+        {loading ? (
+          <div style={styles.emptyText}>กำลังโหลด...</div>
+        ) : selectedDay ? (
+          <div>
+            <button type="button" className="srp-cal-back" onClick={() => setSelectedDay(null)}>← กลับไปปฏิทิน</button>
+            <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, marginBottom: 10 }}>
+              {selectedDay} {THAI_MONTHS[mMonth]} {mYear}
+            </div>
+            {dayReports.length === 0 ? (
+              <div style={styles.emptyText}>ไม่มีรายงานวันนี้</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, maxHeight: 340, overflowY: "auto" }}>
+                {dayReports.map((r) => (
+                  <div key={r.id} style={{ ...styles.reportCard, cursor: "pointer" }} onClick={() => window.open(`?report=${r.id}`, "_blank")}>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {r.photo_urls && r.photo_urls[0] && (
+                        <img src={r.photo_urls[0]} alt={r.rank_name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+                      )}
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={styles.reportProject}>{r.rank_name}</div>
+                        <div style={styles.reportMeta}>{r.unit}</div>
+                        {r.notes && <div style={styles.reportNotes}>{r.notes}</div>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="srp-cal-weekdays">
+              {["อา", "จ", "อ", "พ", "พฤ", "ศ", "ส"].map((d) => <div key={d}>{d}</div>)}
+            </div>
+            <div className="srp-cal-grid">
+              {cells.map((d, idx) =>
+                d === null ? (
+                  <div key={idx} className="srp-cal-cell empty" />
+                ) : (
+                  <div
+                    key={idx}
+                    className={`srp-cal-cell${dayCounts[d] ? " has-reports" : ""}`}
+                    onClick={() => setSelectedDay(d)}
+                  >
+                    <div>{d}</div>
+                    {dayCounts[d] ? <div className="srp-cal-badge">{dayCounts[d]}</div> : null}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+        <button className="srp-modal-close" onClick={onClose}>ปิด</button>
+      </div>
+    </div>
+  );
+}
+
 // ---- Report form ----
 function ReportForm() {
   const initDate = todayParts();
@@ -365,32 +500,11 @@ function ReportForm() {
   const [day, setDay] = useState(initDate.day);
   const [month, setMonth] = useState(initDate.month);
   const [year, setYear] = useState(initDate.year);
-  const [reports, setReports] = useState([]);
-  const [loadingReports, setLoadingReports] = useState(false);
   const [showRecentModal, setShowRecentModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [toast, setToast] = useState("");
   const fileInputRef = useRef(null);
-
-  const loadReports = useCallback(async () => {
-    setLoadingReports(true);
-    try {
-      const res = await fetch(`${REST_URL}?select=*&order=created_at.desc&limit=50`, { headers: SUPABASE_HEADERS });
-      if (!res.ok) throw new Error("load failed");
-      const data = await res.json();
-      setReports(data);
-    } catch (e) {
-      setError("โหลดรายงานไม่สำเร็จ ลองอีกครั้ง");
-    } finally {
-      setLoadingReports(false);
-    }
-  }, []);
-
-  function openRecentModal() {
-    setShowRecentModal(true);
-    loadReports();
-  }
 
   useEffect(() => {
     if (!toast) return;
@@ -447,8 +561,6 @@ function ReportForm() {
         }),
       });
       if (!res.ok) throw new Error("insert failed: " + (await res.text()));
-      const [inserted] = await res.json();
-      setReports((prev) => [inserted, ...prev]);
       photoFiles.forEach((p) => URL.revokeObjectURL(p.previewUrl));
       setNotes("");
       setPhotoFiles([]);
@@ -532,7 +644,7 @@ function ReportForm() {
 
       <button
         type="button"
-        onClick={openRecentModal}
+        onClick={() => setShowRecentModal(true)}
         style={{
           width: "100%",
           marginTop: 14,
@@ -547,45 +659,12 @@ function ReportForm() {
           cursor: "pointer",
         }}
       >
-        ดูรายงานล่าสุด
+        ดูรายงานประจำวัน
       </button>
 
       {toast && <div style={styles.toast}>{toast}</div>}
 
-      {showRecentModal && (
-        <div className="srp-modal-overlay" onClick={() => setShowRecentModal(false)}>
-          <div className="srp-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div style={styles.sectionTitle}>รายงานล่าสุด</div>
-            {loadingReports ? (
-              <div style={styles.emptyText}>กำลังโหลด...</div>
-            ) : reports.length === 0 ? (
-              <div style={styles.emptyText}>ยังไม่มีรายงาน</div>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {reports.map((r) => (
-                  <div key={r.id} style={{ ...styles.reportCard, cursor: "pointer" }} onClick={() => window.open(`?report=${r.id}`, "_blank")}>
-                    <div style={{ display: "flex", gap: 10 }}>
-                      {r.photo_urls && r.photo_urls[0] && (
-                        <img src={r.photo_urls[0]} alt={r.rank_name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
-                      )}
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <div style={styles.reportProject}>{r.rank_name}</div>
-                        <div style={styles.reportMeta}>{r.unit}</div>
-                        <div style={styles.reportMeta}>
-                          {r.report_day} {THAI_MONTHS[r.report_month]} {r.report_year}
-                          {r.photo_urls && r.photo_urls.length > 1 ? ` · ${r.photo_urls.length} รูป` : ""}
-                        </div>
-                        {r.notes && <div style={styles.reportNotes}>{r.notes}</div>}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            <button className="srp-modal-close" onClick={() => setShowRecentModal(false)}>ปิด</button>
-          </div>
-        </div>
-      )}
+      {showRecentModal && <RecentReportsModal onClose={() => setShowRecentModal(false)} />}
     </div>
   );
 }
