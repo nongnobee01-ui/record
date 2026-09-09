@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>รายงานหน้างาน</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#17203A" />
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAIAAADdvvtQAAACxElEQVR4nO3csW0VURBAUYzogOAHJA7oAInAGSKhAIpwSS7CBRCAyJFoABFCQEAPBFSAr/9/b5ZzGtgJrkYj7WqvTtc3T+Chnq4egNkERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBETybO3jf3z7uHaAy/j18/urN7erpzgLG+hCvn6+Wz3CWQjocg7ZkIAu6ngNCejSDtaQgBY4UkMCWuMwDQlomWM0JKCVDtCQgBab3pCA1hvdkIC2MLchAe1iaEMC2sjEhgS0l3ENCWg7sxoSEImAdjRoCQloU1MaEtC+RjQkoK3t35CAdrd5QwIaYOeGBDTDtg0JaIw9GxLQJBs2JKBhdmtIQPNs1ZCARtqnIQFNtUlDAhpsh4YENNvyhhb/H+g/cXrxcvUI52IDkQiIREAkAiKZd0T/vn29eoQzen73ZfUI/8YGIhEQiYBIBEQy74ged2Yemw1EIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCTz3sZ/+nC/eoSHe/vu/eoRHpkNRCIgEgGRCIhk3hF9vDt0NBuIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEjmvY3f5JNWHwX8ZQORCIhEQCQCIpl3RLtet2IDkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRXJ2ub1bPwGA2EImASAREIiASAZEIiERAJAIiERCJgEgERCIgEgGRCIhEQCQCIhEQiYBIBEQiIBIBkQiIREAkAiIREImASAREIiASAZEIiERAJAIiERCJgEj+AIbDVTLyY6n5AAAAAElFTkSuQmCC" />
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACkUlEQVR4nO3bsW1UURBAUYzogMABiQM6QCJwhkgogCJckougAAIQORINIEIICOjBDXCFkP7uvLc+p4E/wdVopLd7dX1z+wT+5un0AKxLHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBejby1Z/fP4189wx+//rx6s3d9BTHsDmO9+3L/fQIxxDHSVxGH+I4lQvoQxwntHsf4jitrfsQx8nt24c4zmHTPsRxJjv2IY7z2a4PcZzVXn2I49w26kMcA3bpQxwztuhDHGPW70MckxbvQxzDVu5DHPOW7UMcS1izD3GsYsE+xLGQ1foQx1qW6kMcy1mnD3GsaJE+xLGoFfoQx7rG+xDH0mb7EMfqBvsQxwam+pj5I/UFu37xcnqEw9gcJHGQxEESB2mPg/TP3evpEQ72/P7r9Aj/ZnOQxEESB0kcpD0O0i3Ot8tjc5DEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRykPR7ePn/8MD3C/3n77v30CAewOUjiIImDJA7SHgfpZdx327E5SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDtIeD2+zvwR7tM9+NgdJHCRxkMRB2uMgfbQn4SybgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0tX1ze30DCzK5iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhID3nkUNJye/oXAAAAAElFTkSuQmCC" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="รายงานหน้างาน" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500&display=swap" rel="stylesheet">
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #F6F4EE; }
+  * { box-sizing: border-box; }
+  body { font-family: 'IBM Plex Sans Thai', sans-serif; }
+  .srp-input, .srp-textarea, .srp-select {
+    width: 100%;
+    font-family: 'IBM Plex Sans Thai', sans-serif;
+    font-size: 15px;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid #C9C2B4;
+    background: #FFFFFF;
+    color: #17203A;
+    outline: none;
+  }
+  .srp-input:focus, .srp-textarea:focus, .srp-select:focus { border-color: #E8622C; }
+  .srp-camera-tile {
+    width: 100%;
+    border: 2px dashed #C9C2B4;
+    border-radius: 12px;
+    background: #FFFFFF;
+    padding: 22px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    color: #5C6672;
+  }
+  .srp-submit {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    border: none;
+    background: #E8622C;
+    color: #FFFFFF;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .srp-submit:disabled { opacity: 0.6; cursor: default; }
+  .srp-thumb-wrap { position: relative; }
+  .srp-thumb-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #17203A;
+    color: #fff;
+    border: none;
+    font-size: 12px;
+    line-height: 20px;
+    cursor: pointer;
+  }
+  .srp-date-row { display: flex; gap: 8px; }
+  .srp-date-row .srp-select.day { flex: 0 0 64px; padding-left: 8px; padding-right: 4px; }
+  .srp-date-row .srp-select.month { flex: 1 1 auto; min-width: 0; padding-left: 8px; padding-right: 4px; }
+  .srp-date-row .srp-select.year { flex: 0 0 78px; padding-left: 8px; padding-right: 4px; }
+  .srp-nav { display: flex; gap: 8px; margin-bottom: 18px; }
+  .srp-nav-btn {
+    flex: 1;
+    padding: 10px 4px;
+    border-radius: 10px;
+    border: 1px solid #C9C2B4;
+    background: #FFFFFF;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: #5C6672;
+    cursor: pointer;
+  }
+  .srp-nav-btn.active { border-color: #17203A; background: #17203A; color: #fff; }
+  .srp-modal-overlay {
+    position: fixed; inset: 0; background: rgba(23,32,58,0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px; z-index: 50;
+  }
+  .srp-modal-card {
+    background: #FBFAF6; border-radius: 16px; padding: 22px;
+    max-width: 400px; width: 100%; max-height: 85vh; overflow-y: auto;
+  }
+  .srp-modal-close {
+    width: 100%; padding: 12px; border-radius: 8px; border: none;
+    background: #17203A; color: #fff; font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600; font-size: 14px; cursor: pointer; margin-top: 16px;
+  }
+  .srp-dash-select { flex: 1; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ---- Supabase project config ----
+const SUPABASE_URL = "https://ilmseajjmcnfukbggybv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_j5dAF3aJAkjQcmXRU6rYUg_EEeXsaKp";
+const REST_URL = `${SUPABASE_URL}/rest/v1/reports`;
+const STORAGE_UPLOAD_URL = `${SUPABASE_URL}/storage/v1/object/photos`;
+const STORAGE_PUBLIC_URL = `${SUPABASE_URL}/storage/v1/object/public/photos`;
+
+const SUPABASE_HEADERS = {
+  apikey: SUPABASE_KEY,
+  Authorization: `Bearer ${SUPABASE_KEY}`,
+};
+
+const THAI_MONTHS = [
+  "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+  "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม",
+];
+
+const MAX_PHOTOS = 6;
+
+function todayParts() {
+  const now = new Date();
+  return { day: now.getDate(), month: now.getMonth(), year: now.getFullYear() + 543 };
+}
+
+function compressImage(file, maxWidth = 900, quality = 0.6) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxWidth / img.width);
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("compress failed"))), "image/jpeg", quality);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function daysInMonth(monthIdx, yearBE) {
+  const yearAD = yearBE - 543;
+  return new Date(yearAD, monthIdx + 1, 0).getDate();
+}
+
+async function uploadPhoto(blob) {
+  const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+  const res = await fetch(`${STORAGE_UPLOAD_URL}/${path}`, {
+    method: "POST",
+    headers: { ...SUPABASE_HEADERS, "Content-Type": "image/jpeg" },
+    body: blob,
+  });
+  if (!res.ok) throw new Error("upload failed: " + (await res.text()));
+  return `${STORAGE_PUBLIC_URL}/${path}`;
+}
+
+// ---- Daily summary popup ----
+function SummaryModal({ data, onClose }) {
+  if (!data) return null;
+  return (
+    <div className="srp-modal-overlay" onClick={onClose}>
+      <div className="srp-modal-card" onClick={(e) => e.stopPropagation()}>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 12, color: "#5C6672" }}>
+          สรุปวันนี้
+        </div>
+        <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22, marginBottom: 14 }}>
+          {data.day} {THAI_MONTHS[data.month]} {data.year}
+        </div>
+
+        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+          <div style={styles.statBox}>
+            <div style={styles.statNumber}>{data.totalReports}</div>
+            <div style={styles.statLabel}>รายงานวันนี้</div>
+          </div>
+          <div style={styles.statBox}>
+            <div style={styles.statNumber}>{data.unitCounts.length}</div>
+            <div style={styles.statLabel}>หน่วยที่ส่งมา</div>
+          </div>
+          <div style={styles.statBox}>
+            <div style={styles.statNumber}>{data.totalPhotos}</div>
+            <div style={styles.statLabel}>รูปทั้งหมด</div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: 13, color: "#5C6672", marginBottom: 8, fontWeight: 500 }}>รายชื่อผู้ส่งรายงานวันนี้</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 200, overflowY: "auto" }}>
+          {data.entries.map((e, idx) => (
+            <div key={idx} style={styles.summaryRow}>
+              <span style={{ fontWeight: 500 }}>{e.rank_name}</span>
+              <span style={{ color: "#5C6672" }}>{e.unit}</span>
+            </div>
+          ))}
+        </div>
+
+        <button className="srp-modal-close" onClick={onClose}>ปิด</button>
+      </div>
+    </div>
+  );
+}
+
+async function fetchDailySummary(day, month, year) {
+  const res = await fetch(
+    `${REST_URL}?select=rank_name,unit,photo_urls&report_day=eq.${day}&report_month=eq.${month}&report_year=eq.${year}`,
+    { headers: SUPABASE_HEADERS }
+  );
+  if (!res.ok) throw new Error("summary failed");
+  const rows = await res.json();
+  const unitSet = new Set(rows.map((r) => r.unit));
+  const totalPhotos = rows.reduce((sum, r) => sum + ((r.photo_urls && r.photo_urls.length) || 0), 0);
+  return {
+    day, month, year,
+    totalReports: rows.length,
+    unitCounts: Array.from(unitSet),
+    totalPhotos,
+    entries: rows.map((r) => ({ rank_name: r.rank_name, unit: r.unit })),
+  };
+}
+
+// ---- Monthly dashboard ----
+function Dashboard() {
+  const initDate = todayParts();
+  const [dMonth, setDMonth] = useState(initDate.month);
+  const [dYear, setDYear] = useState(initDate.year);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const canvasRef = useRef(null);
+  const chartRef = useRef(null);
+
+  const yearOptions = Array.from({ length: 6 }, (_, i) => initDate.year - 2 + i);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`${REST_URL}?select=*&report_month=eq.${dMonth}&report_year=eq.${dYear}`, { headers: SUPABASE_HEADERS })
+      .then((res) => res.json())
+      .then((data) => { if (!cancelled) setRows(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!cancelled) setRows([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [dMonth, dYear]);
+
+  const totalDays = daysInMonth(dMonth, dYear);
+  const perDayCounts = Array.from({ length: totalDays }, (_, i) => {
+    const d = i + 1;
+    return rows.filter((r) => r.report_day === d).length;
+  });
+
+  const unitCounts = {};
+  rows.forEach((r) => { unitCounts[r.unit] = (unitCounts[r.unit] || 0) + 1; });
+  const unitRows = Object.entries(unitCounts).sort((a, b) => b[1] - a[1]);
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    if (chartRef.current) chartRef.current.destroy();
+    chartRef.current = new Chart(canvasRef.current, {
+      type: "bar",
+      data: {
+        labels: Array.from({ length: totalDays }, (_, i) => i + 1),
+        datasets: [{
+          data: perDayCounts,
+          backgroundColor: "#E8622C",
+          borderRadius: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 } },
+          x: { ticks: { font: { size: 10 } } },
+        },
+      },
+    });
+    return () => { if (chartRef.current) chartRef.current.destroy(); };
+  }, [rows, dMonth, dYear]);
+
+  return (
+    <div>
+      <div className="srp-date-row" style={{ marginBottom: 16 }}>
+        <select className="srp-select srp-dash-select" value={dMonth} onChange={(e) => setDMonth(Number(e.target.value))}>
+          {THAI_MONTHS.map((m, idx) => <option key={m} value={idx}>{m}</option>)}
+        </select>
+        <select className="srp-select" style={{ flex: "0 0 90px" }} value={dYear} onChange={(e) => setDYear(Number(e.target.value))}>
+          {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+        </select>
+      </div>
+
+      {loading ? (
+        <div style={styles.emptyText}>กำลังโหลด...</div>
+      ) : (
+        <React.Fragment>
+          <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+            <div style={styles.statBox}>
+              <div style={styles.statNumber}>{rows.length}</div>
+              <div style={styles.statLabel}>รายงานเดือนนี้</div>
+            </div>
+            <div style={styles.statBox}>
+              <div style={styles.statNumber}>{unitRows.length}</div>
+              <div style={styles.statLabel}>หน่วยที่ส่ง</div>
+            </div>
+          </div>
+
+          <div style={styles.card}>
+            <div style={styles.sectionTitle}>จำนวนรายงานรายวัน</div>
+            <div style={{ height: 180 }}>
+              <canvas ref={canvasRef}></canvas>
+            </div>
+          </div>
+
+          <div style={{ ...styles.card, marginTop: 16 }}>
+            <div style={styles.sectionTitle}>สรุปตามหน่วย</div>
+            {unitRows.length === 0 ? (
+              <div style={styles.emptyText}>ยังไม่มีข้อมูลเดือนนี้</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {unitRows.map(([unit, count]) => (
+                  <div key={unit} style={styles.summaryRow}>
+                    <span>{unit}</span>
+                    <span style={{ fontWeight: 600 }}>{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
+// ---- Report form ----
+function ReportForm({ onSubmitted }) {
+  const initDate = todayParts();
+  const [rankName, setRankName] = useState("");
+  const [unit, setUnit] = useState("");
+  const [notes, setNotes] = useState("");
+  const [photoFiles, setPhotoFiles] = useState([]);
+  const [day, setDay] = useState(initDate.day);
+  const [month, setMonth] = useState(initDate.month);
+  const [year, setYear] = useState(initDate.year);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [toast, setToast] = useState("");
+  const fileInputRef = useRef(null);
+
+  const loadReports = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`${REST_URL}?select=*&order=created_at.desc&limit=50`, { headers: SUPABASE_HEADERS });
+      if (!res.ok) throw new Error("load failed");
+      const data = await res.json();
+      setReports(data);
+    } catch (e) {
+      setError("โหลดรายงานไม่สำเร็จ ลองรีเฟรชอีกครั้ง");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadReports(); }, [loadReports]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(""), 2200);
+    return () => clearTimeout(t);
+  }, [toast]);
+
+  useEffect(() => {
+    const maxDay = daysInMonth(month, year);
+    if (day > maxDay) setDay(maxDay);
+  }, [month, year, day]);
+
+  async function handleFiles(fileList) {
+    setError("");
+    const files = Array.from(fileList).slice(0, MAX_PHOTOS - photoFiles.length);
+    if (files.length === 0) return;
+    try {
+      const compressed = await Promise.all(files.map((f) => compressImage(f)));
+      const withPreviews = compressed.map((blob) => ({ blob, previewUrl: URL.createObjectURL(blob) }));
+      setPhotoFiles((prev) => [...prev, ...withPreviews].slice(0, MAX_PHOTOS));
+    } catch (e) {
+      setError("แนบรูปไม่สำเร็จ ลองใหม่อีกครั้ง");
+    }
+  }
+
+  function removePhoto(idx) {
+    setPhotoFiles((prev) => {
+      const removed = prev[idx];
+      if (removed) URL.revokeObjectURL(removed.previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
+  }
+
+  async function handleSubmit() {
+    setError("");
+    if (!rankName.trim()) return setError("กรอกยศ-ชื่อ-สกุล");
+    if (!unit.trim()) return setError("กรอกหน่วย");
+    if (photoFiles.length === 0) return setError("แนบรูปหน้างานอย่างน้อย 1 รูป");
+
+    setSubmitting(true);
+    try {
+      const photoUrls = await Promise.all(photoFiles.map((p) => uploadPhoto(p.blob)));
+      const res = await fetch(REST_URL, {
+        method: "POST",
+        headers: { ...SUPABASE_HEADERS, "Content-Type": "application/json", Prefer: "return=representation" },
+        body: JSON.stringify({
+          rank_name: rankName.trim(),
+          unit: unit.trim(),
+          notes: notes.trim(),
+          report_day: day,
+          report_month: month,
+          report_year: year,
+          photo_urls: photoUrls,
+        }),
+      });
+      if (!res.ok) throw new Error("insert failed: " + (await res.text()));
+      const [inserted] = await res.json();
+      setReports((prev) => [inserted, ...prev]);
+      photoFiles.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      setNotes("");
+      setPhotoFiles([]);
+      setToast("บันทึกรายงานแล้ว");
+
+      const summary = await fetchDailySummary(day, month, year);
+      onSubmitted(summary);
+    } catch (e) {
+      console.error(e);
+      setError("บันทึกไม่สำเร็จ ลองอีกครั้ง");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const dayOptions = Array.from({ length: daysInMonth(month, year) }, (_, i) => i + 1);
+  const yearOptions = Array.from({ length: 6 }, (_, i) => initDate.year - 2 + i);
+
+  return (
+    <div>
+      <div style={styles.card}>
+        <div style={styles.label}>ยศ-ชื่อ-สกุล</div>
+        <input className="srp-input" placeholder="เช่น ร.ต. สมชาย ใจดี" value={rankName} onChange={(e) => setRankName(e.target.value)} />
+
+        <div style={{ marginTop: 14 }}>
+          <div style={styles.label}>หน่วย</div>
+          <input className="srp-input" placeholder="เช่น ร.31 พัน.2 รอ." value={unit} onChange={(e) => setUnit(e.target.value)} />
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <div style={styles.label}>วันที่รายงาน</div>
+          <div className="srp-date-row">
+            <select className="srp-select day" value={day} onChange={(e) => setDay(Number(e.target.value))}>
+              {dayOptions.map((d) => <option key={d} value={d}>{d}</option>)}
+            </select>
+            <select className="srp-select month" value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+              {THAI_MONTHS.map((m, idx) => <option key={m} value={idx}>{m}</option>)}
+            </select>
+            <select className="srp-select year" value={year} onChange={(e) => setYear(Number(e.target.value))}>
+              {yearOptions.map((y) => <option key={y} value={y}>{y}</option>)}
+            </select>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 16 }}>
+          <div style={styles.label}>รูปหน้างาน</div>
+          {photoFiles.length < MAX_PHOTOS && (
+            <div className="srp-camera-tile" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+              <span style={{ fontSize: 22 }}>＋</span>
+              <span style={{ fontSize: 13 }}>แตะเพื่อถ่าย/แนบรูป ({photoFiles.length}/{MAX_PHOTOS})</span>
+            </div>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            multiple
+            style={{ display: "none" }}
+            onChange={(e) => { handleFiles(e.target.files); e.target.value = ""; }}
+          />
+          {photoFiles.length > 0 && (
+            <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+              {photoFiles.map((p, idx) => (
+                <div className="srp-thumb-wrap" key={idx}>
+                  <img src={p.previewUrl} alt={`รูปหน้างาน ${idx + 1}`} style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 8, border: "1px solid #C9C2B4" }} />
+                  <button className="srp-thumb-remove" onClick={() => removePhoto(idx)} aria-label="ลบรูป">×</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <div style={styles.label}>รายละเอียดงาน</div>
+          <textarea className="srp-textarea" rows={3} placeholder="อธิบายงานที่ทำวันนี้" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </div>
+
+        {error && <div style={styles.errorText}>{error}</div>}
+
+        <button className="srp-submit" style={{ marginTop: 16 }} disabled={submitting} onClick={handleSubmit}>
+          {submitting ? "กำลังบันทึก..." : "บันทึกรายงาน"}
+        </button>
+      </div>
+
+      <div style={{ marginTop: 24 }}>
+        <div style={styles.sectionTitle}>รายงานล่าสุด</div>
+        {loading ? (
+          <div style={styles.emptyText}>กำลังโหลด...</div>
+        ) : reports.length === 0 ? (
+          <div style={styles.emptyText}>ยังไม่มีรายงาน แตะปุ่มด้านบนเพื่อเริ่มบันทึก</div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {reports.map((r) => (
+              <div key={r.id} style={styles.reportCard}>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {r.photo_urls && r.photo_urls[0] && (
+                    <img src={r.photo_urls[0]} alt={r.rank_name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+                  )}
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={styles.reportProject}>{r.rank_name}</div>
+                    <div style={styles.reportMeta}>{r.unit}</div>
+                    <div style={styles.reportMeta}>
+                      {r.report_day} {THAI_MONTHS[r.report_month]} {r.report_year}
+                      {r.photo_urls && r.photo_urls.length > 1 ? ` · ${r.photo_urls.length} รูป` : ""}
+                    </div>
+                    {r.notes && <div style={styles.reportNotes}>{r.notes}</div>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {toast && <div style={styles.toast}>{toast}</div>}
+    </div>
+  );
+}
+
+function App() {
+  const [view, setView] = useState("form");
+  const [summary, setSummary] = useState(null);
+
+  return (
+    <div style={styles.page}>
+      <div style={styles.header}>
+        <div style={styles.headerEyebrow}>รายงานหน้างาน</div>
+        <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : "แดชบอร์ดรายเดือน"}</div>
+      </div>
+
+      <div className="srp-nav">
+        <button className={`srp-nav-btn${view === "form" ? " active" : ""}`} onClick={() => setView("form")}>บันทึกรายงาน</button>
+        <button className={`srp-nav-btn${view === "dashboard" ? " active" : ""}`} onClick={() => setView("dashboard")}>แดชบอร์ด</button>
+      </div>
+
+      {view === "form" ? <ReportForm onSubmitted={setSummary} /> : <Dashboard />}
+
+      <SummaryModal data={summary} onClose={() => setSummary(null)} />
+    </div>
+  );
+}
+
+const styles = {
+  page: { fontFamily: "'IBM Plex Sans Thai', sans-serif", background: "#F6F4EE", minHeight: "100vh", padding: "20px 16px 32px", maxWidth: 460, margin: "0 auto", color: "#17203A", position: "relative" },
+  header: { marginBottom: 14 },
+  headerEyebrow: { fontSize: 12, color: "#5C6672", marginBottom: 2 },
+  headerTitle: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22 },
+  card: { background: "#FBFAF6", border: "1px solid #E4DFD2", borderRadius: 14, padding: 16 },
+  label: { fontSize: 13, color: "#5C6672", marginBottom: 6 },
+  errorText: { color: "#B0402E", fontSize: 13, marginTop: 10 },
+  sectionTitle: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 16, marginBottom: 10 },
+  emptyText: { fontSize: 14, color: "#5C6672" },
+  reportCard: { background: "#FFFFFF", border: "1px solid #E4DFD2", borderRadius: 12, padding: 12 },
+  reportProject: { fontSize: 14, fontWeight: 500 },
+  reportMeta: { fontSize: 12, color: "#5C6672", marginTop: 2 },
+  reportNotes: { fontSize: 13, color: "#3A4356", marginTop: 6, lineHeight: 1.5 },
+  toast: { position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)", background: "#17203A", color: "#fff", padding: "8px 16px", borderRadius: 20, fontSize: 13 },
+  statBox: { flex: 1, background: "#FFFFFF", border: "1px solid #E4DFD2", borderRadius: 10, padding: "10px 6px", textAlign: "center" },
+  statNumber: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22, color: "#E8622C" },
+  statLabel: { fontSize: 11, color: "#5C6672", marginTop: 2 },
+  summaryRow: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderBottom: "1px solid #EFEBE0" },
+};
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
