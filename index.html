@@ -1011,7 +1011,24 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").then((reg) => {
+      // Check for a newer sw.js whenever the tab becomes visible again
+      // (e.g. switching back from another app/tab), so open tabs don't
+      // get stuck showing an old cached version indefinitely.
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") reg.update();
+      });
+    }).catch(() => {});
+  });
+
+  // When a new service worker takes over, the page it's controlling is
+  // running old code — reload once so it picks up the fresh version
+  // automatically, instead of requiring the user to close and reopen the app.
+  let hasReloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (hasReloaded) return;
+    hasReloaded = true;
+    window.location.reload();
   });
 }
 </script>

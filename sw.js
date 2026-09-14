@@ -1,4 +1,4 @@
-const CACHE_NAME = "site-report-cache-v2";
+const CACHE_NAME = "site-report-cache-v3";
 const CORE_ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (event) => {
@@ -18,15 +18,16 @@ self.addEventListener("activate", (event) => {
 });
 
 // Network-first for core assets (so updates show up immediately), falling back
-// to cache only when offline. Everything else (Supabase API, fonts, CDN
-// scripts) goes straight to network untouched.
+// to cache only when offline. cache: "no-store" makes sure we bypass the
+// browser's own HTTP cache too, not just this service worker's cache.
+// Everything else (Supabase API, fonts, CDN scripts) goes straight to network untouched.
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
   const isCoreAsset = CORE_ASSETS.some((a) => url.pathname.endsWith(a.replace("./", "")));
 
   if (isCoreAsset) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: "no-store" })
         .then((res) => {
           const resClone = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
