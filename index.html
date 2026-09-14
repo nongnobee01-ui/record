@@ -221,6 +221,36 @@ async function uploadPhoto(blob) {
   return `${STORAGE_PUBLIC_URL}/${path}`;
 }
 
+function csvCell(value) {
+  return `"${String(value == null ? "" : value).replace(/"/g, '""')}"`;
+}
+
+function exportReportsCSV(rows, filename) {
+  const headers = ["วันที่", "ยศ-ชื่อ-สกุล", "หน่วย", "สายงาน", "ประเภทงาน", "รายละเอียดงาน", "จำนวนรูป"];
+  const lines = [headers.map(csvCell).join(",")];
+  rows.forEach((r) => {
+    lines.push([
+      `${r.report_day}/${r.report_month + 1}/${r.report_year}`,
+      r.rank_name,
+      r.unit,
+      r.sayngan,
+      r.worktype,
+      r.notes,
+      (r.photo_urls && r.photo_urls.length) || 0,
+    ].map(csvCell).join(","));
+  });
+  // Leading BOM so Excel opens the Thai text correctly.
+  const blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 // ---- Report detail page (opened in a new tab) ----
 // ---- Fullscreen image lightbox ----
 async function downloadImage(url) {
@@ -486,7 +516,15 @@ function Dashboard() {
             </div>
           </div>
 
-          <div style={styles.card}>
+          <button
+            type="button"
+            onClick={() => exportReportsCSV(rows, `รายงาน-${THAI_MONTHS[dMonth]}-${dYear}.csv`)}
+            style={styles.exportBtn}
+          >
+            ⬇ ดาวน์โหลดข้อมูลเดือนนี้ (CSV)
+          </button>
+
+          <div style={{ ...styles.card, marginTop: 16 }}>
             <div style={styles.sectionTitle}>จำนวนรายงานรายวัน</div>
             <div style={{ height: 180 }}>
               <canvas ref={canvasRef}></canvas>
@@ -583,6 +621,140 @@ function Dashboard() {
                         {count}
                       </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </React.Fragment>
+      )}
+    </div>
+  );
+}
+
+// ---- Daily dashboard ----
+function DailyDashboard() {
+  const initDate = todayParts();
+  const [day, setDay] = useState(initDate.day);
+  const [month, setMonth] = useState(initDate.month);
+  const [year, setYear] = useState(initDate.year);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetch(`${REST_URL}?select=*&report_day=eq.${day}&report_month=eq.${month}&report_year=eq.${year}`, { headers: SUPABASE_HEADERS })
+      .then((res) => res.json())
+      .then((data) => { if (!cancelled) setRows(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!cancelled) setRows([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [day, month, year]);
+
+  function shiftDay(delta) {
+    const yearAD = year - 543;
+    const d = new Date(yearAD, month, day);
+    d.setDate(d.getDate() + delta);
+    setDay(d.getDate());
+    setMonth(d.getMonth());
+    setYear(d.getFullYear() + 543);
+  }
+
+  const unitCounts = {};
+  rows.forEach((r) => { unitCounts[r.unit] = (unitCounts[r.unit] || 0) + 1; });
+  const unitRows = Object.entries(unitCounts).sort((a, b) => b[1] - a[1]);
+
+  const sayngamCounts = {};
+  rows.forEach((r) => { if (r.sayngan) sayngamCounts[r.sayngan] = (sayngamCounts[r.sayngan] || 0) + 1; });
+  const sayngamRows = Object.entries(sayngamCounts).sort((a, b) => b[1] - a[1]);
+
+  const totalPhotos = rows.reduce((sum, r) => sum + ((r.photo_urls && r.photo_urls.length) || 0), 0);
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+        <button type="button" onClick={() => shiftDay(-1)} style={styles.dayNavBtn}>‹</button>
+        <div style={{ flex: 1, textAlign: "center", fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 16, background: "#FFFFFF", border: "1px solid #C9C2B4", borderRadius: 10, padding: "12px 8px" }}>
+          {day} {THAI_MONTHS[month]} {year}
+        </div>
+        <button type="button" onClick={() => shiftDay(1)} style={styles.dayNavBtn}>›</button>
+      </div>
+
+      {loading ? (
+        <div style={styles.emptyText}>กำลังโหลด...</div>
+      ) : (
+        <React.Fragment>
+          <div style={{ display: "flex", gap: 10, marginBottom: 18 }}>
+            <div style={styles.statBox}>
+              <div style={styles.statNumber}>{rows.length}</div>
+              <div style={styles.statLabel}>รายงานวันนี้</div>
+            </div>
+            <div style={styles.statBox}>
+              <div style={styles.statNumber}>{unitRows.length}</div>
+              <div style={styles.statLabel}>หน่วยที่ส่ง</div>
+            </div>
+            <div style={styles.statBox}>
+              <div style={styles.statNumber}>{totalPhotos}</div>
+              <div style={styles.statLabel}>รูปแนบทั้งหมด</div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => exportReportsCSV(rows, `รายงาน-${day}-${THAI_MONTHS[month]}-${year}.csv`)}
+            style={styles.exportBtn}
+          >
+            ⬇ ดาวน์โหลดข้อมูลวันนี้ (CSV)
+          </button>
+
+          <div style={{ display: "flex", gap: 16 }}>
+            <div style={{ ...styles.card, flex: 1, padding: 16 }}>
+              <div style={{ ...styles.sectionTitle, fontSize: 15 }}>หน่วยที่ส่ง</div>
+              {unitRows.length === 0 ? (
+                <div style={styles.emptyText}>ไม่มี</div>
+              ) : (
+                unitRows.map(([u, c]) => (
+                  <div key={u} style={styles.summaryRow}><span>{u}</span><span style={{ fontWeight: 600 }}>{c}</span></div>
+                ))
+              )}
+            </div>
+            <div style={{ ...styles.card, flex: 1, padding: 16 }}>
+              <div style={{ ...styles.sectionTitle, fontSize: 15 }}>สายงาน</div>
+              {sayngamRows.length === 0 ? (
+                <div style={styles.emptyText}>ไม่มี</div>
+              ) : (
+                sayngamRows.map(([s, c]) => (
+                  <div key={s} style={styles.summaryRow}><span>{s}</span><span style={{ fontWeight: 600 }}>{c}</span></div>
+                ))
+              )}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 20 }}>
+            <div style={styles.sectionTitle}>รายงานทั้งหมดวันนี้</div>
+            {rows.length === 0 ? (
+              <div style={styles.emptyText}>ยังไม่มีรายงานวันนี้</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {rows.map((r) => (
+                  <div key={r.id} style={{ ...styles.reportCard, cursor: "pointer" }} onClick={() => window.open(`?report=${r.id}`, "_blank")}>
+                    <div style={styles.reportProject}>{r.rank_name}</div>
+                    <div style={styles.reportMeta}>{r.unit}</div>
+                    {(r.sayngan || r.worktype) && (
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8 }}>
+                        {r.sayngan && (
+                          <span style={{ fontSize: 11, background: "#EFEBE0", color: "#3A4356", borderRadius: 20, padding: "4px 10px" }}>
+                            {r.sayngan}
+                          </span>
+                        )}
+                        {r.worktype && (
+                          <span style={{ fontSize: 11, background: "#FDECE4", color: "#B84A1F", borderRadius: 20, padding: "4px 10px" }}>
+                            {r.worktype}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1021,7 +1193,7 @@ function App() {
             <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 36, width: "auto" }} />
             <div style={styles.headerEyebrow}>การรายงานประจำวัน ทภ.1</div>
           </div>
-          <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : "แดชบอร์ดรายเดือน"}</div>
+          <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : view === "daily" ? "แดชบอร์ดรายวัน" : "แดชบอร์ดรายเดือน"}</div>
         </div>
         <button
           type="button"
@@ -1047,10 +1219,11 @@ function App() {
 
       <div className="srp-nav">
         <button className={`srp-nav-btn${view === "form" ? " active" : ""}`} onClick={() => setView("form")}>บันทึกรายงาน</button>
-        <button className={`srp-nav-btn${view === "dashboard" ? " active" : ""}`} onClick={() => setView("dashboard")}>แดชบอร์ด</button>
+        <button className={`srp-nav-btn${view === "daily" ? " active" : ""}`} onClick={() => setView("daily")}>รายวัน</button>
+        <button className={`srp-nav-btn${view === "dashboard" ? " active" : ""}`} onClick={() => setView("dashboard")}>รายเดือน</button>
       </div>
 
-      {view === "form" ? <ReportForm /> : <Dashboard />}
+      {view === "form" ? <ReportForm /> : view === "daily" ? <DailyDashboard /> : <Dashboard />}
 
       {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
     </div>
@@ -1076,6 +1249,15 @@ const styles = {
   statNumber: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22, color: "#E8622C" },
   statLabel: { fontSize: 11, color: "#5C6672", marginTop: 2 },
   summaryRow: { display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", borderBottom: "1px solid #EFEBE0" },
+  exportBtn: {
+    width: "100%", padding: "12px", borderRadius: 8, border: "1px solid #C9C2B4",
+    background: "#FFFFFF", color: "#17203A", fontFamily: "'IBM Plex Sans Thai', sans-serif",
+    fontWeight: 500, fontSize: 14, cursor: "pointer", marginBottom: 16,
+  },
+  dayNavBtn: {
+    width: 44, height: 44, borderRadius: 10, border: "1px solid #C9C2B4",
+    background: "#FFFFFF", color: "#17203A", fontSize: 20, cursor: "pointer", flexShrink: 0,
+  },
 };
 
 const _urlParams = new URLSearchParams(window.location.search);
