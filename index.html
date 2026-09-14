@@ -325,8 +325,8 @@ function ReportDetailPage({ id }) {
         ← ปิดหน้านี้
       </button>
       <div style={styles.header}>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 20, width: "auto" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 36, width: "auto" }} />
           <div style={styles.headerEyebrow}>การรายงานประจำวัน ทภ.1</div>
         </div>
         <div style={styles.headerTitle}>รายละเอียดรายงาน</div>
@@ -933,8 +933,8 @@ function App() {
     <div style={styles.page}>
       <div style={{ ...styles.header, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 20, width: "auto" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 36, width: "auto" }} />
             <div style={styles.headerEyebrow}>การรายงานประจำวัน ทภ.1</div>
           </div>
           <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : "แดชบอร์ดรายเดือน"}</div>
@@ -976,7 +976,7 @@ function App() {
 const styles = {
   page: { fontFamily: "'IBM Plex Sans Thai', sans-serif", background: "#F6F4EE", minHeight: "100vh", padding: "20px 16px 32px", maxWidth: 460, margin: "0 auto", color: "#17203A", position: "relative" },
   header: { marginBottom: 14 },
-  headerEyebrow: { fontSize: 12, color: "#5C6672", marginBottom: 2 },
+  headerEyebrow: { fontSize: 20, fontWeight: 700, color: "#17203A", marginBottom: 2 },
   headerTitle: { fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 22 },
   card: { background: "#FBFAF6", border: "1px solid #E4DFD2", borderRadius: 14, padding: 16 },
   label: { fontSize: 13, color: "#5C6672", marginBottom: 6 },
