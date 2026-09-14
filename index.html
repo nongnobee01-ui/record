@@ -226,9 +226,10 @@ function csvCell(value) {
 }
 
 function exportReportsCSV(rows, filename) {
-  const headers = ["วันที่", "ยศ-ชื่อ-สกุล", "หน่วย", "สายงาน", "ประเภทงาน", "รายละเอียดงาน", "จำนวนรูป"];
+  const headers = ["วันที่", "ยศ-ชื่อ-สกุล", "หน่วย", "สายงาน", "ประเภทงาน", "รายละเอียดงาน", "จำนวนรูป", "ลิงก์รูปภาพ"];
   const lines = [headers.map(csvCell).join(",")];
   rows.forEach((r) => {
+    const photoLinks = (r.photo_urls || []).join(" | ");
     lines.push([
       `${r.report_day}/${r.report_month + 1}/${r.report_year}`,
       r.rank_name,
@@ -237,6 +238,7 @@ function exportReportsCSV(rows, filename) {
       r.worktype,
       r.notes,
       (r.photo_urls && r.photo_urls.length) || 0,
+      photoLinks,
     ].map(csvCell).join(","));
   });
   // Leading BOM so Excel opens the Thai text correctly.
