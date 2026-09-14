@@ -160,6 +160,24 @@ const THAI_MONTHS = [
 
 const MAX_PHOTOS = 6;
 
+const SAYNGAN_OPTIONS = ["งานกำลังพล", "งานข่าว", "งานยุทธการ", "งานกิจการพลเรือน"];
+
+const WORKTYPE_OPTIONS = [
+  "การฝึก",
+  "งานกองกำลัง",
+  "ตรวจพื้นที่ /เวรยาม รก.",
+  "1 ปี 1 วุฒิ",
+  "จอส.พัฒนา",
+  "จอส.ภัยพิบัติ",
+  "บริจาคโลหิต",
+  "ซ่อมบ้าน/มอบบ้านผู้ยากไร้",
+  "ช่วยผู้ป่วยติดเตียง",
+  "มอบของผู้ยากไร้",
+  "สนับสนุนกิจกรรมโรงเรียน",
+  "อบรม ครู ก (ครูประวัติศาสตร์)",
+  "อื่นๆ",
+];
+
 function todayParts() {
   const now = new Date();
   return { day: now.getDate(), month: now.getMonth(), year: now.getFullYear() + 543 };
@@ -275,7 +293,10 @@ function ReportDetailPage({ id }) {
         ← ปิดหน้านี้
       </button>
       <div style={styles.header}>
-        <div style={styles.headerEyebrow}>การรายงานประจำวัน</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 20, width: "auto" }} />
+          <div style={styles.headerEyebrow}>การรายงานประจำวัน ทภ.1</div>
+        </div>
         <div style={styles.headerTitle}>รายละเอียดรายงาน</div>
       </div>
 
@@ -291,6 +312,21 @@ function ReportDetailPage({ id }) {
           <div style={{ fontSize: 13, color: "#5C6672", marginBottom: 16 }}>
             {report.unit} · {report.report_day} {THAI_MONTHS[report.report_month]} {report.report_year}
           </div>
+
+          {(report.sayngan || report.worktype) && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+              {report.sayngan && (
+                <span style={{ fontSize: 12, background: "#EFEBE0", color: "#3A4356", borderRadius: 20, padding: "5px 12px" }}>
+                  {report.sayngan}
+                </span>
+              )}
+              {report.worktype && (
+                <span style={{ fontSize: 12, background: "#FDECE4", color: "#B84A1F", borderRadius: 20, padding: "5px 12px" }}>
+                  {report.worktype}
+                </span>
+              )}
+            </div>
+          )}
 
           {report.photo_urls && report.photo_urls.length > 0 && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
@@ -352,6 +388,16 @@ function Dashboard() {
   const unitCounts = {};
   rows.forEach((r) => { unitCounts[r.unit] = (unitCounts[r.unit] || 0) + 1; });
   const unitRows = Object.entries(unitCounts).sort((a, b) => b[1] - a[1]);
+
+  const sayngamCounts = {};
+  rows.forEach((r) => { if (r.sayngan) sayngamCounts[r.sayngan] = (sayngamCounts[r.sayngan] || 0) + 1; });
+  const sayngamRows = Object.entries(sayngamCounts).sort((a, b) => b[1] - a[1]);
+  const maxSayngan = Math.max(1, ...sayngamRows.map(([, c]) => c));
+
+  const worktypeCounts = {};
+  rows.forEach((r) => { if (r.worktype) worktypeCounts[r.worktype] = (worktypeCounts[r.worktype] || 0) + 1; });
+  const worktypeRows = Object.entries(worktypeCounts).sort((a, b) => b[1] - a[1]);
+  const maxWorktype = Math.max(1, ...worktypeRows.map(([, c]) => c));
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -422,6 +468,54 @@ function Dashboard() {
                   <div key={unit} style={styles.summaryRow}>
                     <span>{unit}</span>
                     <span style={{ fontWeight: 600 }}>{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ ...styles.card, marginTop: 16 }}>
+            <div style={styles.sectionTitle}>สรุปตามสายงาน</div>
+            {sayngamRows.length === 0 ? (
+              <div style={styles.emptyText}>ยังไม่มีข้อมูลเดือนนี้</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {sayngamRows.map(([label, count]) => (
+                  <div key={label}>
+                    <div style={{ fontSize: 13, marginBottom: 4 }}>{label}</div>
+                    <div style={{ background: "#EFEBE0", borderRadius: 6, overflow: "hidden" }}>
+                      <div style={{
+                        width: `${(count / maxSayngan) * 100}%`,
+                        background: "#E8622C", color: "#fff", fontSize: 12, fontWeight: 600,
+                        padding: "4px 8px", borderRadius: 6, minWidth: 24, textAlign: "right",
+                      }}>
+                        {count}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ ...styles.card, marginTop: 16 }}>
+            <div style={styles.sectionTitle}>สรุปตามประเภทงาน</div>
+            {worktypeRows.length === 0 ? (
+              <div style={styles.emptyText}>ยังไม่มีข้อมูลเดือนนี้</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                {worktypeRows.map(([label, count]) => (
+                  <div key={label}>
+                    <div style={{ fontSize: 13, marginBottom: 4 }}>{label}</div>
+                    <div style={{ background: "#EFEBE0", borderRadius: 6, overflow: "hidden" }}>
+                      <div style={{
+                        width: `${(count / maxWorktype) * 100}%`,
+                        background: "#E8622C", color: "#fff", fontSize: 12, fontWeight: 600,
+                        padding: "4px 8px", borderRadius: 6, minWidth: 24, textAlign: "right",
+                      }}>
+                        {count}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -547,6 +641,9 @@ function ReportForm() {
   const initDate = todayParts();
   const [rankName, setRankName] = useState("");
   const [unit, setUnit] = useState("");
+  const [sayngan, setSayngan] = useState("");
+  const [worktype, setWorktype] = useState("");
+  const [worktypeOther, setWorktypeOther] = useState("");
   const [notes, setNotes] = useState("");
   const [photoFiles, setPhotoFiles] = useState([]);
   const [day, setDay] = useState(initDate.day);
@@ -594,6 +691,9 @@ function ReportForm() {
     setError("");
     if (!rankName.trim()) return setError("กรอกยศ-ชื่อ-สกุล");
     if (!unit.trim()) return setError("กรอกหน่วย");
+    if (!sayngan) return setError("เลือกสายงาน");
+    if (!worktype) return setError("เลือกอธิบายงานแบบย่อ");
+    if (worktype === "อื่นๆ" && !worktypeOther.trim()) return setError("ระบุรายละเอียดของ \"อื่นๆ\"");
     if (photoFiles.length === 0) return setError("แนบรูปหน้างานอย่างน้อย 1 รูป");
 
     setSubmitting(true);
@@ -605,6 +705,8 @@ function ReportForm() {
         body: JSON.stringify({
           rank_name: rankName.trim(),
           unit: unit.trim(),
+          sayngan,
+          worktype: worktype === "อื่นๆ" ? worktypeOther.trim() : worktype,
           notes: notes.trim(),
           report_day: day,
           report_month: month,
@@ -614,6 +716,9 @@ function ReportForm() {
       });
       if (!res.ok) throw new Error("insert failed: " + (await res.text()));
       photoFiles.forEach((p) => URL.revokeObjectURL(p.previewUrl));
+      setSayngan("");
+      setWorktype("");
+      setWorktypeOther("");
       setNotes("");
       setPhotoFiles([]);
       setToast("บันทึกรายงานแล้ว");
@@ -637,6 +742,31 @@ function ReportForm() {
         <div style={{ marginTop: 14 }}>
           <div style={styles.label}>หน่วย</div>
           <input className="srp-input" placeholder="เช่น ร.31 พัน.2 รอ." value={unit} onChange={(e) => setUnit(e.target.value)} />
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <div style={styles.label}>สายงาน</div>
+          <select className="srp-select" value={sayngan} onChange={(e) => setSayngan(e.target.value)}>
+            <option value="" disabled>เลือกสายงาน</option>
+            {SAYNGAN_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <div style={styles.label}>อธิบายงานแบบย่อ</div>
+          <select className="srp-select" value={worktype} onChange={(e) => setWorktype(e.target.value)}>
+            <option value="" disabled>เลือกประเภทงาน</option>
+            {WORKTYPE_OPTIONS.map((w) => <option key={w} value={w}>{w}</option>)}
+          </select>
+          {worktype === "อื่นๆ" && (
+            <input
+              className="srp-input"
+              style={{ marginTop: 8 }}
+              placeholder='ระบุรายละเอียด "อื่นๆ"'
+              value={worktypeOther}
+              onChange={(e) => setWorktypeOther(e.target.value)}
+            />
+          )}
         </div>
 
         <div style={{ marginTop: 14 }}>
@@ -771,7 +901,10 @@ function App() {
     <div style={styles.page}>
       <div style={{ ...styles.header, display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
         <div>
-          <div style={styles.headerEyebrow}>การรายงานประจำวัน</div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <img src="tha1-logo.png" alt="ทภ.1" style={{ height: 20, width: "auto" }} />
+            <div style={styles.headerEyebrow}>การรายงานประจำวัน ทภ.1</div>
+          </div>
           <div style={styles.headerTitle}>{view === "form" ? "บันทึกงานวันนี้" : "แดชบอร์ดรายเดือน"}</div>
         </div>
         <button
