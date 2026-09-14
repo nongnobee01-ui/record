@@ -642,10 +642,12 @@ function DailyDashboard() {
   const [year, setYear] = useState(initDate.year);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedSayngan, setSelectedSayngan] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
+    setSelectedSayngan(null);
     fetch(`${REST_URL}?select=*&report_day=eq.${day}&report_month=eq.${month}&report_year=eq.${year}`, { headers: SUPABASE_HEADERS })
       .then((res) => res.json())
       .then((data) => { if (!cancelled) setRows(Array.isArray(data) ? data : []); })
@@ -663,13 +665,15 @@ function DailyDashboard() {
     setYear(d.getFullYear() + 543);
   }
 
+  const filteredRows = selectedSayngan ? rows.filter((r) => r.sayngan === selectedSayngan) : rows;
+
   const unitCounts = {};
-  rows.forEach((r) => { unitCounts[r.unit] = (unitCounts[r.unit] || 0) + 1; });
+  filteredRows.forEach((r) => { unitCounts[r.unit] = (unitCounts[r.unit] || 0) + 1; });
   const unitRows = Object.entries(unitCounts).sort((a, b) => b[1] - a[1]);
 
-  const sayngamCounts = {};
-  rows.forEach((r) => { if (r.sayngan) sayngamCounts[r.sayngan] = (sayngamCounts[r.sayngan] || 0) + 1; });
-  const sayngamRows = Object.entries(sayngamCounts).sort((a, b) => b[1] - a[1]);
+  const sayngamCountMap = {};
+  rows.forEach((r) => { if (r.sayngan) sayngamCountMap[r.sayngan] = (sayngamCountMap[r.sayngan] || 0) + 1; });
+  const sayngamButtons = SAYNGAN_OPTIONS.map((label) => [label, sayngamCountMap[label] || 0]);
 
   const totalPhotos = rows.reduce((sum, r) => sum + ((r.photo_urls && r.photo_urls.length) || 0), 0);
 
@@ -704,42 +708,61 @@ function DailyDashboard() {
 
           <button
             type="button"
-            onClick={() => exportReportsCSV(rows, `รายงาน-${day}-${THAI_MONTHS[month]}-${year}.csv`)}
+            onClick={() => exportReportsCSV(filteredRows, `รายงาน-${day}-${THAI_MONTHS[month]}-${year}${selectedSayngan ? "-" + selectedSayngan : ""}.csv`)}
             style={styles.exportBtn}
           >
             ⬇ ดาวน์โหลดข้อมูลวันนี้ (CSV)
           </button>
 
-          <div style={{ display: "flex", gap: 16 }}>
-            <div style={{ ...styles.card, flex: 1, padding: 16 }}>
-              <div style={{ ...styles.sectionTitle, fontSize: 15 }}>หน่วยที่ส่ง</div>
-              {unitRows.length === 0 ? (
-                <div style={styles.emptyText}>ไม่มี</div>
-              ) : (
-                unitRows.map(([u, c]) => (
-                  <div key={u} style={styles.summaryRow}><span>{u}</span><span style={{ fontWeight: 600 }}>{c}</span></div>
-                ))
-              )}
+          <div style={{ ...styles.card, marginBottom: 16 }}>
+            <div style={styles.sectionTitle}>สายงาน</div>
+            <div style={{ fontSize: 12, color: "#5C6672", marginTop: -8, marginBottom: 12 }}>
+              แตะเพื่อกรองดูเฉพาะสายงานนั้น
             </div>
-            <div style={{ ...styles.card, flex: 1, padding: 16 }}>
-              <div style={{ ...styles.sectionTitle, fontSize: 15 }}>สายงาน</div>
-              {sayngamRows.length === 0 ? (
-                <div style={styles.emptyText}>ไม่มี</div>
-              ) : (
-                sayngamRows.map(([s, c]) => (
-                  <div key={s} style={styles.summaryRow}><span>{s}</span><span style={{ fontWeight: 600 }}>{c}</span></div>
-                ))
-              )}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {sayngamButtons.map(([label, count]) => {
+                const isActive = selectedSayngan === label;
+                return (
+                  <div
+                    key={label}
+                    onClick={() => setSelectedSayngan(isActive ? null : label)}
+                    style={{
+                      cursor: "pointer", borderRadius: 10, padding: "13px 8px", textAlign: "center",
+                      fontSize: 14, fontFamily: "'IBM Plex Sans Thai', sans-serif", fontWeight: 600,
+                      background: isActive ? "#E8622C" : "#FFFFFF",
+                      color: isActive ? "#FFFFFF" : (count > 0 ? "#17203A" : "#B0B0B0"),
+                      border: isActive ? "none" : "1px solid #C9C2B4",
+                    }}
+                  >
+                    {label} ({count})
+                  </div>
+                );
+              })}
             </div>
           </div>
 
+          <div style={{ ...styles.card, marginBottom: 16 }}>
+            <div style={{ ...styles.sectionTitle, fontSize: 15 }}>
+              หน่วยที่ส่ง{selectedSayngan ? ` (เฉพาะสายงานที่เลือก)` : ""}
+            </div>
+            {unitRows.length === 0 ? (
+              <div style={styles.emptyText}>ไม่มี</div>
+            ) : (
+              unitRows.map(([u, c]) => (
+                <div key={u} style={styles.summaryRow}><span>{u}</span><span style={{ fontWeight: 600 }}>{c}</span></div>
+              ))
+            )}
+          </div>
+
           <div style={{ marginTop: 20 }}>
-            <div style={styles.sectionTitle}>รายงานทั้งหมดวันนี้</div>
-            {rows.length === 0 ? (
-              <div style={styles.emptyText}>ยังไม่มีรายงานวันนี้</div>
+            <div style={styles.sectionTitle}>
+              รายงานทั้งหมดวันนี้{selectedSayngan ? ` — ${selectedSayngan}` : ""}
+            </div>
+            {filteredRows.length === 0 ? (
+              <div style={styles.emptyText}>{selectedSayngan ? "ไม่มีรายงานในสายงานนี้" : "ยังไม่มีรายงานวันนี้"}</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {rows.map((r) => (
+                {filteredRows.map((r) => (
                   <div key={r.id} style={{ ...styles.reportCard, cursor: "pointer" }} onClick={() => window.open(`?report=${r.id}`, "_blank")}>
                     <div style={styles.reportProject}>{r.rank_name}</div>
                     <div style={styles.reportMeta}>{r.unit}</div>
